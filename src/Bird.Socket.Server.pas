@@ -21,18 +21,21 @@ type
     procedure DoOnConnect(AContext: TIdContext);
     procedure DoOnDisconnect(AContext: TIdContext);
     procedure DoOnExecute(AContext: TIdContext);
+
   protected
     function DoExecute(ABird: TIdContext): Boolean; override;
     procedure DoConnect(ABird: TIdContext); override;
+
   public
     constructor Create(const APort: Integer);
     property OnExecute;
     property Birds: TBirds read FBirds;
     procedure InitSSL(AIdServerIOHandlerSSLOpenSSL: TIdServerIOHandlerSSLOpenSSL);
     procedure AddEventListener(const AEventType: TEventType; const AEvent: TEventListener);
-    procedure Start; virtual; abstract;
-    procedure Stop;
+    procedure Start; virtual;
+    procedure Stop; virtual;
     destructor Destroy; override;
+
   end;
 
 implementation
@@ -61,7 +64,7 @@ begin
   inherited Create;
   FBirds := TBirds.Create;
   DefaultPort := APort;
-  Active := True;
+  Active := False;
   FIdHashSHA1 := TIdHashSHA1.Create;
   FIdServerIOHandlerSSLOpenSSL := nil;
   OnConnect := DoOnConnect;
@@ -202,10 +205,14 @@ begin
   end;
 end;
 
+procedure TBirdSocketServer.Start;
+begin
+  Self.Active := True;
+end;
+
 procedure TBirdSocketServer.Stop;
 begin
-  if Self.Active then
-    Self.StopListening;
+  Self.Active := False;
 end;
 
 end.
