@@ -3,8 +3,9 @@ unit Service;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.SvcMgr, Vcl.Dialogs,
-  Bird.Socket;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.SvcMgr, Vcl.Dialogs,
+  Bird.Socket.Server;
 
 type
   TBirdSocketService = class(TService)
@@ -15,8 +16,9 @@ type
     procedure ServiceStart(Sender: TService; var Started: Boolean);
     procedure ServiceStop(Sender: TService; var Stopped: Boolean);
     procedure ServiceExecute(Sender: TService);
+    procedure ServiceContinue(Sender: TService; var Continued: Boolean);
   private
-    FBirdSocket: TBirdSocket;
+    FBirdSocket: TBirdSocketServer;
   public
     function GetServiceController: TServiceController; override;
   end;
@@ -27,6 +29,10 @@ var
 implementation
 
 {$R *.dfm}
+
+uses
+  Bird.Socket.Types,
+  Bird.Socket.Connection;
 
 procedure ServiceController(CtrlCode: DWord); stdcall;
 begin
@@ -40,7 +46,7 @@ end;
 
 procedure TBirdSocketService.ServiceCreate(Sender: TObject);
 begin
-  FBirdSocket := TBirdSocket.Create(8080);
+  FBirdSocket := TBirdSocketServer.Create(8080);
 
   FBirdSocket.AddEventListener(TEventType.EXECUTE,
     procedure(const ABird: TBirdSocketConnection)
@@ -60,13 +66,18 @@ end;
 procedure TBirdSocketService.ServiceDestroy(Sender: TObject);
 begin
   FBirdSocket.Stop;
-  FBirdSocket.DisposeOf;
+  FBirdSocket.Free;
 end;
 
 procedure TBirdSocketService.ServiceExecute(Sender: TService);
 begin
   while not Self.Terminated do
     ServiceThread.ProcessRequests(True);
+end;
+
+procedure TBirdSocketService.ServiceContinue(Sender: TService; var Continued: Boolean);
+begin
+  FBirdSocket.Start;
 end;
 
 procedure TBirdSocketService.ServicePause(Sender: TService; var Paused: Boolean);

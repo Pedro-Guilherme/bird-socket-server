@@ -3,7 +3,7 @@ unit Bird.Socket.View;
 interface
 
 uses Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms,
-  Vcl.Dialogs, dxGDIPlusClasses, Vcl.ExtCtrls, Vcl.StdCtrls, Bird.Socket;
+  Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Bird.Socket.Server;
 
 type
   TFrmMainMenu = class(TForm)
@@ -28,8 +28,9 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
     procedure btnSendClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FBirdSocket: TBirdSocket;
+    FBirdSocket: TBirdSocketServer;
     procedure HandlerButtons(const AConnected: Boolean);
   end;
 
@@ -40,6 +41,10 @@ implementation
 
 {$R *.dfm}
 
+uses
+  System.Generics.Collections,
+  Bird.Socket.Connection, Bird.Socket.Types;
+
 procedure TFrmMainMenu.btnClearClick(Sender: TObject);
 begin
   ListBoxLog.Clear;
@@ -48,14 +53,21 @@ end;
 procedure TFrmMainMenu.btnSendClick(Sender: TObject);
 var
   LBird: TBirdSocketConnection;
+  vBirds: TList<TBirdSocketConnection>;
+
 begin
-  for LBird in FBirdSocket.Birds.Items do
-  begin
-    if (LBird.Id.ToString = cbxClients.Text) then
+  vBirds := FBirdSocket.Birds.LockList;
+  try
+    for LBird in vBirds do
     begin
-      LBird.Send(edtMessage.Text);
-      Break;
+      if (LBird.Id.ToString = cbxClients.Text) then
+      begin
+        LBird.Send(edtMessage.Text);
+        Break;
+      end;
     end;
+  finally
+    FBirdSocket.Birds.UnlockList;
   end;
 end;
 
@@ -72,9 +84,14 @@ begin
   HandlerButtons(False);
 end;
 
+procedure TFrmMainMenu.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := TCloseAction.caFree;
+end;
+
 procedure TFrmMainMenu.FormCreate(Sender: TObject);
 begin
-  FBirdSocket := TBirdSocket.Create(8080);
+  FBirdSocket := TBirdSocketServer.Create(8080);
 
   FBirdSocket.AddEventListener(TEventType.CONNECT,
     procedure(const ABird: TBirdSocketConnection)

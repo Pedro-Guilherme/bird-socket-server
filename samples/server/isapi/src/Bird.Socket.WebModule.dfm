@@ -1,5 +1,4 @@
 object BirdSocketWebModule: TBirdSocketWebModule
-  OldCreateOrder = False
   OnCreate = WebModuleCreate
   OnDestroy = WebModuleDestroy
   Actions = <

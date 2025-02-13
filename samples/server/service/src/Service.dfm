@@ -1,8 +1,8 @@
 object BirdSocketService: TBirdSocketService
-  OldCreateOrder = False
   OnCreate = ServiceCreate
   OnDestroy = ServiceDestroy
   DisplayName = 'Bird Socket Service Sample'
+  OnContinue = ServiceContinue
   OnExecute = ServiceExecute
   OnPause = ServicePause
   OnShutdown = ServiceShutdown
