@@ -53,10 +53,15 @@ begin
 end;
 
 procedure TBirdSocketServer.DoOnConnect(AContext: TIdContext);
+var
+  vBird: TBirdSocketConnection;
+
 begin
-  FBirds.Add(TBirdSocketConnection.Create(AContext));
+  vBird := TBirdSocketConnection.Create(AContext);
+  FBirds.Add(vBird);
+
   if Assigned(FOnConnect) then
-    FOnConnect(FBirds.Last);
+    FOnConnect(vBird);
 end;
 
 constructor TBirdSocketServer.Create(const APort: Integer);
@@ -75,27 +80,32 @@ end;
 destructor TBirdSocketServer.Destroy;
 begin
   Active := False;
-  FIdHashSHA1.DisposeOf;
-  FBirds.DisposeOf;
+  FIdHashSHA1.Free;
+  FBirds.Free;
   inherited;
 end;
 
 procedure TBirdSocketServer.DoOnDisconnect(AContext: TIdContext);
 var
-  LBird: TBirdSocketConnection;
+  vBird: TBirdSocketConnection;
+
 begin
-  LBird := GetBirdFromContext(AContext);
+  vBird := GetBirdFromContext(AContext);
+
   if Assigned(FOnDisconnect) then
-    FOnDisconnect(LBird);
-  FBirds.Remove(LBird);
-  LBird.Free;
+    FOnDisconnect(vBird);
+
+  FBirds.Remove(vBird);
+  vBird.Free;
 end;
 
 procedure TBirdSocketServer.DoConnect(ABird: TIdContext);
 begin
   if (ABird.Connection.IOHandler is TIdSSLIOHandlerSocketBase) then
     TIdSSLIOHandlerSocketBase(ABird.Connection.IOHandler).PassThrough := False;
+
   ABird.Connection.IOHandler.HandShaked := False;
+
   inherited;
 end;
 
@@ -104,6 +114,7 @@ var
   LBytes: TArray<Byte>;
   LMessage: string;
   LHeaders: THeaders;
+
 begin
   if not ABird.Connection.IOHandler.HandShaked then
   begin
@@ -115,6 +126,7 @@ begin
         LMessage := IndyTextEncoding_UTF8.GetString(TIdBytes(LBytes));
       except
       end;
+
       LHeaders := ParseHeaders(LMessage);
       try
         if LHeaders.ContainsKey(HEADERS_UPGRADE) and LHeaders.ContainsKey(HEADERS_AUTHORIZATION) then
@@ -125,13 +137,15 @@ begin
                 IndyTextEncoding_UTF8);
             except
             end;
+
             ABird.Connection.IOHandler.HandShaked := True;
           end;
       finally
-        LHeaders.DisposeOf;
+        LHeaders.Free;
       end;
     end;
   end;
+
   Result := inherited;
 end;
 
@@ -145,6 +159,7 @@ function TBirdSocketServer.GetBirdFromContext(const AContext: TIdContext): TBird
 var
   LBird: TBirdSocketConnection;
   LBirds: TList<TBirdSocketConnection>;
+
 begin
   LBirds := FBirds.LockList;
   try
@@ -153,9 +168,10 @@ begin
       if LBird.IsEquals(AContext) then
         Exit(LBird);
     end;
+
     Result := TBirdSocketConnection.Create(AContext);
   finally
-    FBirds.UnLockList
+    FBirds.UnLockList;
   end;
 end;
 
