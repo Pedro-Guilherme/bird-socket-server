@@ -40,6 +40,7 @@ begin
           ABird.Send('empty message');
 
         Writeln('Msg from ' + ABird.Id.ToString + ': ' + LMessage);
+        ABird.Send('Reply to ' + LMessage);
       end);
 
     LBirdSocket.AddEventListener(TEventType.DISCONNECT,
