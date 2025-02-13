@@ -74,17 +74,17 @@ end;
 
 The bird socket can run in many Delphi way.
 
-[**Console**](https://github.com/mateusvicente100/bird-socket-server/tree/master/samples/server/console) - Run a console application
+[**Console**](https://github.com/Pedro-Guilherme/bird-socket-server/tree/master/samples/server/console) - Run a console application
 
-[**ISAPI**](https://github.com/mateusvicente100/bird-socket-server/tree/master/samples/server/isapi) - Generate a ISAPI dll for IIS
+[**ISAPI**](https://github.com/Pedro-Guilherme/bird-socket-server/tree/master/samples/server/isapi) - Generate a ISAPI dll for IIS
 
-[**VCL**](https://github.com/mateusvicente100/bird-socket-server/tree/master/samples/server/vcl) - Run a VCL application
+[**VCL**](https://github.com/Pedro-Guilherme/bird-socket-server/tree/master/samples/server/vcl) - Run a VCL application
 
-[**Service**](https://github.com/mateusvicente100/bird-socket-server/tree/master/samples/server/service) - Run a windows service
+[**Service**](https://github.com/Pedro-Guilherme/bird-socket-server/tree/master/samples/server/service) - Run a windows service
 
 ## Delphi Client
 
-For Delphi websocket connections I recommend to use the [**bird-socket-client**](https://github.com/mateusvicente100/bird-socket-client) project. It's simple to use and install
+For Delphi websocket connections I recommend to use the [**bird-socket-client**](https://github.com/Pedro-Guilherme/bird-socket-client) project. It's simple to use and install
 
 ```pascal
 procedure Start;
